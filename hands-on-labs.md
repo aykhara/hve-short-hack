@@ -67,6 +67,7 @@ Master slash commands, chat participants, variables, and Agent mode. Understand 
 Create custom instructions and custom agents tailored to your project needs. Learn how to enhance Copilot's context awareness for your specific development scenarios.
 
 **Step 4: Set Up Project-Specific Copilot Configuration**  
+Create a `.github` folder in the project root directory.
 Define your own `copilot-instructions.md` and `engineering-fundamentals.md` files in the `.github` directory.
 
 > **Note:** See the [microsoft/edge-ai](https://github.com/microsoft/edge-ai) repository. See the [prompt-builder.chatmode.md](https://github.com/microsoft/edge-ai/blob/main/.github/chatmodes/prompt-builder.chatmode.md) for the builder tool.
