@@ -1,0 +1,4 @@
+.copilot-tracking/plans/**
+.copilot-tracking/research/**
+.github.examples/**
+**/.DS_Store

@@ -1,0 +1,6 @@
+inventory:
+- source: DirectOwners
+  items:
+  - id: ayhara@microsoft.com
+  - id: sijiao@microsoft.com
+  isProduction: false
