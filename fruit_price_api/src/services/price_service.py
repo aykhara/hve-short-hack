@@ -1,51 +1,84 @@
-"""Service for retrieving fruit price data."""
+"""
+Price service for managing fruit price data.
 
-import json
+This module provides the business logic for retrieving current and
+historical fruit prices.
+"""
+
 import logging
 from datetime import date
-from pathlib import Path
-from typing import Dict, Any
 
-from src.models.fruit import Fruit, PriceResponse
+from src.data.sample_prices import (
+    CURRENT_PRICES,
+    DEFAULT_CURRENCY,
+    PriceData,
+    get_prices_for_date,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def get_daily_prices() -> PriceResponse:
-    """
-    Retrieve daily fruit prices from the data file.
+class PriceService:
+    """Service class for managing fruit price operations."""
 
-    Returns:
-        PriceResponse: Response containing current date, currency, and fruit prices.
+    def __init__(self) -> None:
+        """Initialize the PriceService."""
+        self.currency = DEFAULT_CURRENCY
+        logger.info("PriceService initialized")
 
-    Raises:
-        FileNotFoundError: If the prices data file cannot be found.
-        ValueError: If the data file contains invalid data.
-    """
-    data_file = Path(__file__).parent.parent / "data" / "prices.json"
+    def get_current_prices(self) -> PriceData:
+        """
+        Get current fruit prices for today.
 
-    logger.info(f"Loading price data from {data_file}")
+        Returns:
+            PriceData: Dictionary containing date, currency, and fruit prices
+        """
+        today = date.today()
+        logger.info(f"Fetching current prices for {today.isoformat()}")
 
-    try:
-        with open(data_file, "r", encoding="utf-8") as f:
-            data: Dict[str, Any] = json.load(f)
-    except FileNotFoundError as e:
-        logger.error(f"Price data file not found: {data_file}")
-        raise FileNotFoundError(f"Price data file not found: {data_file}") from e
-    except json.JSONDecodeError as e:
-        logger.error(f"Invalid JSON in price data file: {e}")
-        raise ValueError(f"Invalid JSON in price data file: {e}") from e
+        price_data: PriceData = {
+            "date": today.isoformat(),
+            "currency": self.currency,
+            "fruits": CURRENT_PRICES.copy(),
+        }
 
-    try:
-        fruits = [Fruit(**fruit_data) for fruit_data in data["fruits"]]
-    except (KeyError, TypeError) as e:
-        logger.error(f"Invalid data structure in price file: {e}")
-        raise ValueError(f"Invalid data structure in price file: {e}") from e
+        logger.info(
+            f"Retrieved {len(price_data['fruits'])} fruit prices "
+            f"for {today.isoformat()}"
+        )
+        return price_data
 
-    today = date.today().isoformat()
+    def get_prices_by_date(self, target_date: date) -> PriceData:
+        """
+        Get fruit prices for a specific date.
 
-    response = PriceResponse(date=today, currency="USD", fruits=fruits)
+        Args:
+            target_date: The date to get prices for
 
-    logger.info(f"Successfully loaded {len(fruits)} fruit prices for {today}")
+        Returns:
+            PriceData: Dictionary containing date, currency, and fruit prices
+        """
+        logger.info(f"Fetching prices for {target_date.isoformat()}")
 
-    return response
+        fruits = get_prices_for_date(target_date)
+
+        price_data: PriceData = {
+            "date": target_date.isoformat(),
+            "currency": self.currency,
+            "fruits": fruits.copy(),
+        }
+
+        logger.info(
+            f"Retrieved {len(price_data['fruits'])} fruit prices "
+            f"for {target_date.isoformat()}"
+        )
+        return price_data
+
+    def get_fruit_count(self) -> int:
+        """
+        Get the total number of fruits available.
+
+        Returns:
+            int: Number of fruits in the price list
+        """
+        return len(CURRENT_PRICES)

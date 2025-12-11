@@ -1,29 +1,21 @@
+output "instrumentation_key" {
+  description = "Application Insights instrumentation key"
+  value       = azurerm_application_insights.appinsights.instrumentation_key
+  sensitive   = true
+}
+
+output "connection_string" {
+  description = "Application Insights connection string"
+  value       = azurerm_application_insights.appinsights.connection_string
+  sensitive   = true
+}
+
+output "app_id" {
+  description = "Application Insights application ID"
+  value       = azurerm_application_insights.appinsights.app_id
+}
+
 output "log_analytics_workspace_id" {
-  description = "ID of the Log Analytics workspace"
-  value       = azurerm_log_analytics_workspace.main.id
-}
-
-output "log_analytics_workspace_name" {
-  description = "Name of the Log Analytics workspace"
-  value       = azurerm_log_analytics_workspace.main.name
-}
-
-output "storage_account_id" {
-  description = "ID of the storage account"
-  value       = azurerm_storage_account.logs.id
-}
-
-output "storage_account_name" {
-  description = "Name of the storage account"
-  value       = azurerm_storage_account.logs.name
-}
-
-output "logs_container_name" {
-  description = "Name of the logs container"
-  value       = azurerm_storage_container.logs.name
-}
-
-output "backups_container_name" {
-  description = "Name of the backups container"
-  value       = azurerm_storage_container.backups.name
+  description = "Log Analytics Workspace ID"
+  value       = azurerm_log_analytics_workspace.law.id
 }

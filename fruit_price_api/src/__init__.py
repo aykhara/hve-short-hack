@@ -1,1 +1,1 @@
-"""Fruit Price API - Main package."""
+"""Fruit Price API - Python package for the Fruit Price API."""

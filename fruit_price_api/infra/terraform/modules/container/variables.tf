@@ -22,16 +22,34 @@ variable "app_name" {
   type        = string
 }
 
-variable "application_type" {
-  description = "Type of application being monitored"
+variable "container_image" {
+  description = "Container image name and tag"
   type        = string
-  default     = "web"
+  default     = "fruit-price-api:latest"
 }
 
-variable "retention_days" {
-  description = "Number of days to retain data"
+variable "container_port" {
+  description = "Port the container listens on"
   type        = number
-  default     = 30
+  default     = 5000
+}
+
+variable "cpu_cores" {
+  description = "Number of CPU cores for the container"
+  type        = number
+  default     = 1
+}
+
+variable "memory_gb" {
+  description = "Memory in GB for the container"
+  type        = number
+  default     = 1.5
+}
+
+variable "subnet_id" {
+  description = "Subnet ID for VNet integration"
+  type        = string
+  default     = null
 }
 
 variable "tags" {

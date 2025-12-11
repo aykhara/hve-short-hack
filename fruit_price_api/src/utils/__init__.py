@@ -1,1 +1,1 @@
-"""Utility functions package."""
+"""Utilities module for helper functions."""

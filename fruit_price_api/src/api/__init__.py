@@ -1,1 +1,1 @@
-"""API routes package."""
+"""API module for Flask blueprints."""

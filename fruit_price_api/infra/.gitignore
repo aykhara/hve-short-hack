@@ -1,0 +1,30 @@
+# Terraform-specific files
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+
+# Variable files with sensitive data
+*.auto.tfvars
+*_override.tf
+*_override.tf.json
+override.tf
+override.tf.json
+
+# Terraform plan output
+*.tfplan
+plan.out
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore Mac files
+.DS_Store
+
+# Ignore backup files
+*.bak
+*~

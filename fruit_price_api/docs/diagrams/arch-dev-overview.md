@@ -1,161 +1,119 @@
-# Fruit Price API - Infrastructure Architecture
+# Fruit Price API - Azure Infrastructure Architecture
 
-This diagram shows the complete Azure infrastructure for the Fruit Price API, including networking, compute, database, and monitoring components.
+This diagram represents the Azure infrastructure defined in the Terraform configuration for the development environment.
 
 ```mermaid
 ---
 config:
   layout: elk
+  look: handDrawn
+  theme: base
 ---
-graph TD
-    subgraph "Azure Subscription"
-        subgraph "Resource Group: fruitpriceapi-rg-environment"
-            subgraph "Virtual Network: fruitpriceapi-vnet-environment"
-                subgraph "App Subnet: 10.0.1.0/24"
-                    APP[App Service<br/>Linux Python 3.11<br/>VNet Integrated<br/>System Managed Identity]
-                end
-
-                subgraph "Database Subnet: 10.0.2.0/24"
-                    PSQL[PostgreSQL Flexible Server<br/>Version 14<br/>Private DNS Zone<br/>Database: fruitprices]
-                end
-
-                subgraph "Gateway Subnet: 10.0.3.0/24"
-                    AGW[Application Gateway<br/>Standard v2<br/>HTTP Listener Port 80<br/>Health Probe]
+flowchart TB
+    subgraph Azure["Azure Cloud - East US"]
+        subgraph RG["Resource Group: fruit-price-api-dev-rg"]
+            subgraph VNet["Virtual Network: 10.0.0.0/16"]
+                subgraph Subnet["Container Subnet: 10.0.1.0/24<br/>Delegated to Container Instances"]
+                    ACI["Azure Container Instance<br/>fruit-price-api-dev-aci<br/>CPU: 1 core | Memory: 1.5 GB<br/>Port: 5000<br/>Private IP"]
                 end
             end
-
-            ASP[App Service Plan<br/>Linux OS<br/>Configurable SKU<br/>Auto-scaling Enabled]
             
-            LAW[Log Analytics Workspace<br/>30-day Retention<br/>PerGB2018 SKU]
+            ACR[("Azure Container Registry<br/>fruitpriceapidevacr<br/>SKU: Basic<br/>Admin Enabled")]
             
-            SA[Storage Account<br/>StorageV2 LRS<br/>Versioning Enabled<br/>Lifecycle Policies]
-            
-            subgraph "Storage Containers"
-                LOGS[application-logs<br/>Private Access]
-                BACKUPS[database-backups<br/>Private Access<br/>Cool/Archive Tiers]
+            subgraph Monitoring["Monitoring Stack"]
+                LAW[("Log Analytics Workspace<br/>fruit-price-api-dev-law<br/>Retention: 30 days")]
+                AI["Application Insights<br/>fruit-price-api-dev-ai<br/>Type: web<br/>Retention: 30 days"]
             end
-
-            subgraph "Network Security Groups"
-                APP_NSG[App NSG<br/>Allow HTTP/HTTPS]
-                DB_NSG[Database NSG<br/>Allow PostgreSQL 5432<br/>From App Subnet Only]
-                GW_NSG[Gateway NSG<br/>Allow HTTP/HTTPS<br/>Gateway Manager]
-            end
-
-            AUTO[Auto-scale Setting<br/>CPU-based Scaling<br/>Scale Up: CPU greater than 70%<br/>Scale Down: CPU less than 30%]
-
-            subgraph "Monitoring Alerts"
-                ALERT_CPU[CPU Alert<br/>Threshold: 80%]
-                ALERT_RT[Response Time Alert<br/>Threshold: 5s]
-                ALERT_HTTP[HTTP 5xx Alert<br/>Threshold: 10 errors]
-            end
-        end
-
-        subgraph "External/Client"
-            CLIENT[API Clients<br/>HTTPS Requests]
         end
     end
-
-    %% Connections
-    CLIENT -->|HTTPS| AGW
-    AGW -->|Backend Pool| APP
-    APP -->|VNet Swift Connection| ASP
-    APP -->|PostgreSQL 5432| PSQL
-    APP -->|Environment Variables| PSQL
     
-    APP_NSG -.->|Protects| APP
-    DB_NSG -.->|Protects| PSQL
-    GW_NSG -.->|Protects| AGW
+    Dev["Developer<br/>Local Machine"]
     
-    AUTO -->|Scales| ASP
+    Dev -->|"1. Build & Push Image"| ACR
+    ACR -->|"2. Pull Image"| ACI
+    ACI -.->|"3. Send Logs"| LAW
+    ACI -.->|"4. Send Telemetry"| AI
+    AI -.->|"Backed by"| LAW
     
-    APP -->|Diagnostics| LAW
-    PSQL -->|Diagnostics| LAW
-    AGW -->|Diagnostics| LAW
+    classDef azureCloud fill:#0078d4,stroke:#fff,stroke-width:2px,color:#fff
+    classDef networking fill:#00bcf2,stroke:#fff,stroke-width:2px,color:#fff
+    classDef compute fill:#7fba00,stroke:#fff,stroke-width:2px,color:#fff
+    classDef storage fill:#ff6b35,stroke:#fff,stroke-width:2px,color:#fff
+    classDef monitoring fill:#ff8c00,stroke:#fff,stroke-width:2px,color:#fff
+    classDef external fill:#68217a,stroke:#fff,stroke-width:2px,color:#fff
     
-    APP -->|Logs| LOGS
-    PSQL -->|Backups| BACKUPS
-    
-    LOGS -.->|Stored In| SA
-    BACKUPS -.->|Stored In| SA
-    
-    ALERT_CPU -.->|Monitors| APP
-    ALERT_RT -.->|Monitors| APP
-    ALERT_HTTP -.->|Monitors| APP
-
-    %% Styling
-    classDef compute fill:#0078d4,stroke:#ffffff,stroke-width:2px,color:#ffffff
-    classDef database fill:#7fba00,stroke:#ffffff,stroke-width:2px,color:#ffffff
-    classDef networking fill:#00bcf2,stroke:#ffffff,stroke-width:2px,color:#ffffff
-    classDef storage fill:#fcd116,stroke:#333333,stroke-width:2px,color:#333333
-    classDef monitoring fill:#ff8c00,stroke:#ffffff,stroke-width:2px,color:#ffffff
-    classDef security fill:#ff6b35,stroke:#ffffff,stroke-width:2px,color:#ffffff
-    classDef external fill:#68217a,stroke:#ffffff,stroke-width:2px,color:#ffffff
-
-    class APP,ASP compute
-    class PSQL database
-    class AGW networking
-    class SA,LOGS,BACKUPS storage
-    class LAW,AUTO,ALERT_CPU,ALERT_RT,ALERT_HTTP monitoring
-    class APP_NSG,DB_NSG,GW_NSG security
-    class CLIENT external
+    class Azure azureCloud
+    class RG,VNet,Subnet networking
+    class ACI compute
+    class ACR storage
+    class LAW,AI,Monitoring monitoring
+    class Dev external
 ```
 
 ## Architecture Components
 
-### Networking Layer
-- **Virtual Network**: Isolated network with configurable address space (default: 10.0.0.0/16)
-- **Subnets**: 
-  - App Subnet with delegation to Microsoft.Web/serverFarms
-  - Database Subnet with delegation to Microsoft.DBforPostgreSQL/flexibleServers
-  - Gateway Subnet for Application Gateway
-- **Network Security Groups**: Fine-grained security rules for each subnet
-- **Service Endpoints**: Microsoft.Sql and Microsoft.Storage for secure access
+### Resource Group
+- **Name**: `fruit-price-api-dev-rg`
+- **Location**: East US
+- **Purpose**: Logical container for all dev environment resources
 
-### Compute Layer
-- **App Service Plan**: Linux-based plan with configurable SKU (B1/S1/P1v3)
-- **Linux Web App**: Python 3.11 runtime with Flask application
-  - VNet integration for private communication
-  - System-assigned managed identity
-  - Health check endpoint: `/api/fruits/prices`
-  - Auto-scaling based on CPU metrics
-- **Application Gateway**: Standard_v2 tier with HTTP listener and health probes
+### Networking
+- **Virtual Network**: `fruit-price-api-dev-vnet`
+  - Address Space: `10.0.0.0/16`
+- **Container Subnet**: `container-subnet`
+  - Address Prefix: `10.0.1.0/24`
+  - Delegation: Microsoft.ContainerInstance/containerGroups
 
-### Database Layer
-- **PostgreSQL Flexible Server**: Version 14 with VNet integration
-  - Private DNS zone for secure connectivity
-  - Configurable SKU (B_Standard_B1ms to GP_Standard_D4s_v3)
-  - Automated backups with configurable retention (7-30 days)
-  - Optional geo-redundant backups for production
-- **Database Configuration**: Connection throttling and logging enabled
+### Container Services
+- **Azure Container Registry**: `fruitpriceapidevacr`
+  - SKU: Basic
+  - Admin Enabled: Yes (dev only)
+  - Purpose: Private container image storage
 
-### Monitoring and Storage Layer
-- **Log Analytics Workspace**: Centralized logging with 30-day retention
-- **Storage Account**: StorageV2 with LRS replication
-  - Application logs container with 7-day retention
-  - Database backups container with lifecycle policies (Cool after 30 days, Archive after 90 days, Delete after 365 days)
-- **Metric Alerts**: CPU, response time, HTTP errors monitoring
+- **Azure Container Instance**: `fruit-price-api-dev-aci`
+  - OS Type: Linux
+  - IP Address Type: Private (VNet integrated)
+  - CPU: 1 core
+  - Memory: 1.5 GB
+  - Port: 5000
+  - Purpose: Hosts the Flask API application
 
-### Security
-- **Network Security Groups**: Least-privilege access control
-- **Private Endpoints**: Database accessible only from app subnet
-- **HTTPS Only**: Enforced for all web traffic
-- **Managed Identity**: System-assigned identity for secure Azure service access
+### Monitoring
+- **Log Analytics Workspace**: `fruit-price-api-dev-law`
+  - SKU: PerGB2018
+  - Retention: 30 days
+  - Purpose: Centralized log storage
 
-## Environment Configuration
+- **Application Insights**: `fruit-price-api-dev-ai`
+  - Application Type: web
+  - Retention: 30 days
+  - Purpose: Application performance monitoring and telemetry
 
-The infrastructure supports three environments with different resource sizes:
+## Data Flow
 
-- **Development**: B1 App Service, B1ms PostgreSQL, 1-2 instances, 7-day backups
-- **Staging**: S1 App Service, D2s_v3 PostgreSQL, 2-4 instances, 14-day backups
-- **Production**: P1v3 App Service, D4s_v3 PostgreSQL, 3-10 instances, 30-day geo-redundant backups
+1. **Container Image**: Built locally and pushed to Azure Container Registry (ACR)
+2. **Container Instance**: Pulls image from ACR using admin credentials
+3. **Network**: Container runs in private subnet with VNet integration
+4. **Monitoring**: Container logs flow to Log Analytics Workspace
+5. **Telemetry**: Application metrics sent to Application Insights
 
-## Deployment
+## Security
 
-Deploy the infrastructure using:
+- Container instance uses private networking (VNet integration)
+- ACR requires authentication for image pulls
+- Admin credentials stored securely in Terraform state
+- Monitoring keys marked as sensitive outputs
 
-```bash
-cd fruit_price_api/infra/terraform
-terraform init
-terraform plan -var-file=environments/dev.tfvars
-terraform apply -var-file=environments/dev.tfvars
-```
+## Scalability Notes
+
+This is a **development environment** configuration optimized for:
+- Low cost
+- Simple deployment
+- Quick iteration cycles
+
+For production, consider:
+- Azure Kubernetes Service (AKS) instead of ACI
+- Azure API Management for API gateway
+- Private endpoints for ACR
+- Network Security Groups (NSGs)
+- Azure Key Vault for secrets management

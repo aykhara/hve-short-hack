@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Testing
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Environment and config
+.env
+.env.local
+*.env
+config.local.*
+
+# Development
+README.md
+*.md
+requirements-dev.txt
+pytest.ini
+.editorconfig
+
+# OS
+.DS_Store
+Thumbs.db
