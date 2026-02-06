@@ -13,6 +13,7 @@ my-hack-arch-diagram agent analyzes Terraform (`.tf`) files and produces Mermaid
 - Terraform code present in the repo (e.g. `infra/terraform/.../main.tf`)
 - Existing diagrams (optional) in `docs/diagrams/` (will be compared if present)
 - Basic understanding of your IaC folder layout
+- Mermiad Chart VSCode Extension Installed
 
 ## 🎯 When to Use This Agent
 

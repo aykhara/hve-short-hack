@@ -128,4 +128,4 @@ def multiply(x, y):
 これで VS Code に GitHub Copilot をセットアップし、サインインして、インラインサジェストが動作することを確認できました。今後のコーディングに Copilot を活用する準備が整いました。
 
 ### 次のステップ
-[ステップ 2: GitHub Copilot Chat を使う](./step-2-simple-chat-usage.md) に進み、チャット機能、slash コマンド、Agent モードを学びましょう。
+[ステップ 2: GitHub Copilot Chat を使う](./step-2-simple-chat-usage-jp.md) に進み、チャット機能、slash コマンド、Agent モードを学びましょう。

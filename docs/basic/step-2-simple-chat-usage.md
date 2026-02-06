@@ -260,4 +260,4 @@ You've mastered GitHub Copilot Chat! You can now use chat commands (`/`), chat e
 
 ### Next
 
-Proceed to [Step 3: Customizing GitHub Copilot](./step-3-chat-customization.md) to create custom instructions and custom agents for your project.
+Proceed to [Step 3: Customizing GitHub Copilot](./step-3-chat-customization-jp.md) to create custom instructions and custom agents for your project.

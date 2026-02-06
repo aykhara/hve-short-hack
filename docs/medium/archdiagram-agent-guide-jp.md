@@ -13,6 +13,7 @@ my-hack-arch-diagram エージェントは Terraform (`.tf`) ファイルを解�
 - リポジトリ内に Terraform コードが存在すること（例: `infra/terraform/.../main.tf`）
 - 既存の図（任意）として `docs/diagrams/` 配下にファイルがある場合は比較対象として利用
 - IaC フォルダー構成を基本的に理解していること
+- Mermaid ExtensionをVSCode上にインストール済み
 
 ## 🎯 このエージェントを使うタイミング
 
